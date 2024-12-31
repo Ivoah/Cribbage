@@ -13,7 +13,7 @@ class CribbageGUI extends MainFrame {
     (new ComboBox(Card.names), new ComboBox(Suite.values.toSeq))
   }
 
-  private val scoresList = new ListView(List[(String, Int)]())
+  private val scoresList = new ListView(List[String]())
 
   contents = new BorderPanel() {
     layout(new BoxPanel(Orientation.Vertical) {
@@ -28,10 +28,12 @@ class CribbageGUI extends MainFrame {
         new Separator(),
         new BoxPanel(Orientation.Horizontal) {
           val action: Action = Action("Score") {
-            val hand = Hand(cards.map(c => Card(c._1.selection.item, c._2.selection.item)))
+            val hand = Hand(cards.map(c => Card(c._1.selection.item, c._2.selection.item)).toSet)
             val scores = hand.score(Card(cut._1.selection.item, cut._2.selection.item))
-            scoresList.listData = scores.toSeq
-            action.title = s"Score: ${scores.values.sum}"
+            scoresList.listData = scores.flatMap {
+              case (t, sets) => sets.map{case (s, v) => s"$t for $v: ${s.mkString(", ")}"}
+            }.toSeq
+            action.title = s"Score: ${scores.flatMap(_._2.map(_._2)).sum}"
           }
           contents ++= Seq(
             new Label("Cut: "), cut._1, new Label(" of "), cut._2,

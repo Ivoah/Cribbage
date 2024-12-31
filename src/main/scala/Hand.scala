@@ -1,35 +1,54 @@
-case class Hand(cards: Seq[Card]) {
-  def score(cut: Card, crib: Boolean = false): Map[String, Int] = {
+case class Hand(cards: Set[Card]) {
+  def score(cut: Card, crib: Boolean = false): Map[String, Map[Set[Card], Int]] = {
     Map(
-      "fifteens" -> fifteens(cards :+ cut),
-      "pairs" -> pairs(cards :+ cut),
-      "runs" -> run(cards :+ cut),
-      "flush" -> (if (crib) flush(cards :+ cut) else flush(cards, Some(cut))),
-      "jack" -> jack(cards, cut)
+      "Fifteen" -> fifteens(cards + cut),
+      "Pair" -> pairs(cards + cut),
+      "Run" -> run(cards + cut),
+      "Flush" -> (if (crib) flush(cards + cut) else flush(cards, Some(cut))),
+      "Right jack" -> jack(cards, cut)
     )
   }
 
-  private def fifteens(cards: Seq[Card]): Int =
-    (1 to cards.length).flatMap(n => cards.combinations(n)).count(_.map(_.scoreValue).sum == 15)*2
+  private def fifteens(cards: Set[Card]): Map[Set[Card], Int] =
+    cards.subsets.filter(_.toSeq.map(_.scoreValue).sum == 15).map(_ -> 2).toMap
 
-  private def pairs(cards: Seq[Card]): Int =
-    cards.combinations(2).count{case Seq(c1, c2) => c1.value == c2.value}*2
+  private def pairs(cards: Set[Card]): Map[Set[Card], Int] =
+    cards.subsets(2).filter(_.map(_.value).size == 1).map(_ -> 2).toMap
 
-  private def run(cards: Seq[Card]): Int = {
-    val runs = (3 to cards.length).flatMap(n => cards.combinations(n).filter(_.map(_.value).sorted.sliding(n).exists(_.sliding(2).forall{case Seq(c1, c2) => c1 + 1 == c2})))
-    runs.filterNot(s => runs.exists(l => s.length < l.length && s.forall(l.contains))).map(_.length).sum
+  private def run(cards: Set[Card]): Map[Set[Card], Int] = {
+    val runs = (3 to cards.size).flatMap(n => cards.subsets(n).map(_.toSeq.sorted).filter(_.sliding(n).exists(_.isRun())))
+    val uniqueRuns = runs.filterNot(s => runs.exists(l => s.length < l.length && s.forall(l.contains)))
+    uniqueRuns.map(r => r.toSet -> r.length).toMap
   }
 
-  private def flush(cards: Seq[Card], cut: Option[Card] = None): Int =
-    if (cards.forall(_.suite == cards.head.suite)) cards.length + (if (cut.exists(_.suite == cards.head.suite)) 1 else 0) else 0
+  private def flush(cards: Set[Card], cut: Option[Card] = None): Map[Set[Card], Int] =
+    val suites = cards.map(_.suite)
+    if (suites.size == 1) {
+      if (cut.exists(_.suite == suites.head)) Map((cards + cut.get) -> (cards.size + 1))
+      else Map(cards -> cards.size)
+    } else {
+      Map()
+    }
 
-  private def jack(cards: Seq[Card], cut: Card): Int =
-    if (cards.exists(c => c.value == 11 && c.suite == cut.suite)) 1 else 0
+  private def jack(cards: Set[Card], cut: Card): Map[Set[Card], Int] =
+    cards.find(c => c.value == 11 && c.suite == cut.suite).map(c => Map(Set(c) -> 1)).getOrElse(Map())
 }
 
 @main
 def handTest(): Unit = {
-  val hand = util.Random.shuffle(Seq(Card(1, Suite.Spades), Card(2, Suite.Hearts), Card(3, Suite.Diamonds), Card(3, Suite.Spades), Card(4, Suite.Spades)))
-  println(hand)
-  println(Hand(hand.take(4)).score(hand.last))
+  val hands = Seq(
+    Seq(Card(1, Suite.Spades), Card(2, Suite.Hearts), Card(3, Suite.Diamonds), Card(3, Suite.Spades), Card(4, Suite.Spades)), // 2 runs of 4
+    Seq(Card(13, Suite.Hearts), Card(5, Suite.Hearts), Card(5, Suite.Clubs), Card(10, Suite.Clubs), Card(3, Suite.Diamonds)), // 4 fifteens
+    Seq(Card(1, Suite.Hearts), Card(2, Suite.Hearts), Card(3, Suite.Hearts), Card(8, Suite.Hearts), Card(9, Suite.Clubs)), // Flush without cut
+    Seq(Card(1, Suite.Hearts), Card(2, Suite.Hearts), Card(3, Suite.Hearts), Card(8, Suite.Hearts), Card(9, Suite.Hearts)), // Flush with cut
+    Seq(Card(5, Suite.Clubs), Card(9, Suite.Diamonds), Card(11, Suite.Diamonds), Card(7, Suite.Hearts), Card(3, Suite.Diamonds)) // Right jack
+  )
+  for (hand <- hands) {
+    println(s"Hand: [${hand.mkString(", ")}]")
+    val scores = Hand(hand.take(4).toSet).score(hand.last)
+    for ((t, set) <- scores) {
+      println(s"$t: ${set.map(cards => s"[${cards._1.mkString(", ")}]").mkString(", ")}")
+    }
+    println("---")
+  }
 }
