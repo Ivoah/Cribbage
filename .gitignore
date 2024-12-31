@@ -3,3 +3,7 @@
 project/
 target/
 Cribbage.jar
+.DS_Store
+.bloop/
+.metals/
+.vscode/
