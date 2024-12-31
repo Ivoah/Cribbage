@@ -1,16 +1,11 @@
 case class Hand(cards: Seq[Card]) {
-  def score(starter: Card, crib: Boolean = false): Map[String, Int] = {
-//    fifteens(cards :+ starter) +
-//    pairs(cards :+ starter) +
-//    run(cards :+ starter) +
-//    (if (crib) flush(cards :+ starter) else flush(cards, Some(starter))) +
-//    jack(cards, starter)
+  def score(cut: Card, crib: Boolean = false): Map[String, Int] = {
     Map(
-      "fifteens" -> fifteens(cards :+ starter),
-      "pairs" -> pairs(cards :+ starter),
-      "runs" -> run(cards :+ starter),
-      "flush" -> (if (crib) flush(cards :+ starter) else flush(cards, Some(starter))),
-      "jack" -> jack(cards, starter)
+      "fifteens" -> fifteens(cards :+ cut),
+      "pairs" -> pairs(cards :+ cut),
+      "runs" -> run(cards :+ cut),
+      "flush" -> (if (crib) flush(cards :+ cut) else flush(cards, Some(cut))),
+      "jack" -> jack(cards, cut)
     )
   }
 
@@ -25,17 +20,16 @@ case class Hand(cards: Seq[Card]) {
     runs.filterNot(s => runs.exists(l => s.length < l.length && s.forall(l.contains))).map(_.length).sum
   }
 
-  private def flush(cards: Seq[Card], starter: Option[Card] = None): Int =
-    if (cards.forall(_.suite == cards.head.suite)) cards.length + (if (starter.exists(_.suite == cards.head.suite)) 1 else 0) else 0
+  private def flush(cards: Seq[Card], cut: Option[Card] = None): Int =
+    if (cards.forall(_.suite == cards.head.suite)) cards.length + (if (cut.exists(_.suite == cards.head.suite)) 1 else 0) else 0
 
-  private def jack(cards: Seq[Card], starter: Card): Int =
-    if (cards.exists(c => c.value == 11 && c.suite == starter.suite)) 1 else 0
+  private def jack(cards: Seq[Card], cut: Card): Int =
+    if (cards.exists(c => c.value == 11 && c.suite == cut.suite)) 1 else 0
 }
 
-object Hand {
-  def main(args: Array[String]): Unit = {
-    val hand = util.Random.shuffle(Seq(Card(1, Suite.Spades), Card(2, Suite.Hearts), Card(3, Suite.Diamonds), Card(3, Suite.Spades), Card(4, Suite.Spades)))
-    println(hand)
-    println(Hand(hand.take(4)).score(hand.last))
-  }
+@main
+def handTest(): Unit = {
+  val hand = util.Random.shuffle(Seq(Card(1, Suite.Spades), Card(2, Suite.Hearts), Card(3, Suite.Diamonds), Card(3, Suite.Spades), Card(4, Suite.Spades)))
+  println(hand)
+  println(Hand(hand.take(4)).score(hand.last))
 }

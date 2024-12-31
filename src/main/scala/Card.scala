@@ -1,5 +1,3 @@
-import scala.language.implicitConversions
-
 object Suite extends Enumeration {
   val Diamonds, Hearts, Spades, Clubs = Value
 }
@@ -20,7 +18,7 @@ object Card {
     "Nine", "Ten", "Jack", "Queen", "King"
   )
 
-  val fullDeck = names.flatMap(v => Suite.values.unsorted.map(s => Card(v, s)))
+  val fullDeck = for (s <- Suite.values.toSeq.sorted; v <- names) yield Card(v, s)
 
   def apply(value: String, suite: Suite.Value): Card = Card(names.indexOf(value) + 1, suite)
 }
