@@ -1,10 +1,10 @@
-object Suite extends Enumeration {
+object Suit extends Enumeration {
   val Diamonds, Hearts, Spades, Clubs = Value
 }
 
-case class Card(value: Int, suite: Suite.Value) {
+case class Card(value: Int, suit: Suit.Value) {
   private val name = Card.names(value - 1)
-  override def toString: String = s"$name of $suite"
+  override def toString: String = s"$name of $suit"
 
   val scoreValue: Int = if (value >= 10) 10 else value
 
@@ -22,9 +22,9 @@ object Card {
     "Nine", "Ten", "Jack", "Queen", "King"
   )
 
-  val fullDeck = for (s <- Suite.values.toSeq.sorted; v <- names) yield Card(v, s)
+  val fullDeck = for (s <- Suit.values.toSeq.sorted; v <- names) yield Card(v, s)
 
-  def apply(value: String, suite: Suite.Value): Card = Card(names.indexOf(value) + 1, suite)
+  def apply(value: String, suit: Suit.Value): Card = Card(names.indexOf(value) + 1, suit)
 }
 
 implicit object CardOrdering extends Ordering[Card] {

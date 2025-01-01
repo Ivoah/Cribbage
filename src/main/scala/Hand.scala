@@ -22,26 +22,26 @@ case class Hand(cards: Set[Card]) {
   }
 
   private def flush(cards: Set[Card], cut: Option[Card] = None): Map[Set[Card], Int] =
-    val suites = cards.map(_.suite)
-    if (suites.size == 1) {
-      if (cut.exists(_.suite == suites.head)) Map((cards + cut.get) -> (cards.size + 1))
+    val suits = cards.map(_.suit)
+    if (suits.size == 1) {
+      if (cut.exists(_.suit == suits.head)) Map((cards + cut.get) -> (cards.size + 1))
       else Map(cards -> cards.size)
     } else {
       Map()
     }
 
   private def jack(cards: Set[Card], cut: Card): Map[Set[Card], Int] =
-    cards.find(c => c.value == 11 && c.suite == cut.suite).map(c => Map(Set(c) -> 1)).getOrElse(Map())
+    cards.find(c => c.value == 11 && c.suit == cut.suit).map(c => Map(Set(c) -> 1)).getOrElse(Map())
 }
 
 @main
 def handTest(): Unit = {
   val hands = Seq(
-    Seq(Card(1, Suite.Spades), Card(2, Suite.Hearts), Card(3, Suite.Diamonds), Card(3, Suite.Spades), Card(4, Suite.Spades)), // 2 runs of 4
-    Seq(Card(13, Suite.Hearts), Card(5, Suite.Hearts), Card(5, Suite.Clubs), Card(10, Suite.Clubs), Card(3, Suite.Diamonds)), // 4 fifteens
-    Seq(Card(1, Suite.Hearts), Card(2, Suite.Hearts), Card(3, Suite.Hearts), Card(8, Suite.Hearts), Card(9, Suite.Clubs)), // Flush without cut
-    Seq(Card(1, Suite.Hearts), Card(2, Suite.Hearts), Card(3, Suite.Hearts), Card(8, Suite.Hearts), Card(9, Suite.Hearts)), // Flush with cut
-    Seq(Card(5, Suite.Clubs), Card(9, Suite.Diamonds), Card(11, Suite.Diamonds), Card(7, Suite.Hearts), Card(3, Suite.Diamonds)) // Right jack
+    Seq(Card(1, Suit.Spades), Card(2, Suit.Hearts), Card(3, Suit.Diamonds), Card(3, Suit.Spades), Card(4, Suit.Spades)), // 2 runs of 4
+    Seq(Card(13, Suit.Hearts), Card(5, Suit.Hearts), Card(5, Suit.Clubs), Card(10, Suit.Clubs), Card(3, Suit.Diamonds)), // 4 fifteens
+    Seq(Card(1, Suit.Hearts), Card(2, Suit.Hearts), Card(3, Suit.Hearts), Card(8, Suit.Hearts), Card(9, Suit.Clubs)), // Flush without cut
+    Seq(Card(1, Suit.Hearts), Card(2, Suit.Hearts), Card(3, Suit.Hearts), Card(8, Suit.Hearts), Card(9, Suit.Hearts)), // Flush with cut
+    Seq(Card(5, Suit.Clubs), Card(9, Suit.Diamonds), Card(11, Suit.Diamonds), Card(7, Suit.Hearts), Card(3, Suit.Diamonds)) // Right jack
   )
   for (hand <- hands) {
     println(s"Hand: [${hand.mkString(", ")}]")

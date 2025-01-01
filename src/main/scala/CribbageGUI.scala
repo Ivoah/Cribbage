@@ -8,9 +8,9 @@ class CribbageGUI extends MainFrame {
   LafManager.enabledPreferenceChangeReporting(true)
   LafManager.addThemePreferenceChangeListener(e => LafManager.installTheme(e.getPreferredThemeStyle))
 
-  private val cut = (new ComboBox(Card.names), new ComboBox(Suite.values.toSeq))
+  private val cut = (new ComboBox(Card.names), new ComboBox(Suit.values.toSeq))
   private val cards = (1 to 4).map { _ =>
-    (new ComboBox(Card.names), new ComboBox(Suite.values.toSeq))
+    (new ComboBox(Card.names), new ComboBox(Suit.values.toSeq))
   }
 
   private val scoresList = new ListView(List[String]())
