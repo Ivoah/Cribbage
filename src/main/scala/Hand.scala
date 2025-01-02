@@ -33,22 +33,3 @@ case class Hand(cards: Set[Card]) {
   private def jack(cards: Set[Card], cut: Card): Map[Set[Card], Int] =
     cards.find(c => c.value == 11 && c.suit == cut.suit).map(c => Map(Set(c) -> 1)).getOrElse(Map())
 }
-
-@main
-def handTest(): Unit = {
-  val hands = Seq(
-    Seq(Card(1, Suit.Spades), Card(2, Suit.Hearts), Card(3, Suit.Diamonds), Card(3, Suit.Spades), Card(4, Suit.Spades)), // 2 runs of 4
-    Seq(Card(13, Suit.Hearts), Card(5, Suit.Hearts), Card(5, Suit.Clubs), Card(10, Suit.Clubs), Card(3, Suit.Diamonds)), // 4 fifteens
-    Seq(Card(1, Suit.Hearts), Card(2, Suit.Hearts), Card(3, Suit.Hearts), Card(8, Suit.Hearts), Card(9, Suit.Clubs)), // Flush without cut
-    Seq(Card(1, Suit.Hearts), Card(2, Suit.Hearts), Card(3, Suit.Hearts), Card(8, Suit.Hearts), Card(9, Suit.Hearts)), // Flush with cut
-    Seq(Card(5, Suit.Clubs), Card(9, Suit.Diamonds), Card(11, Suit.Diamonds), Card(7, Suit.Hearts), Card(3, Suit.Diamonds)) // Right jack
-  )
-  for (hand <- hands) {
-    println(s"Hand: [${hand.mkString(", ")}]")
-    val scores = Hand(hand.take(4).toSet).score(hand.last)
-    for ((t, set) <- scores) {
-      println(s"$t: ${set.map(cards => s"[${cards._1.mkString(", ")}]").mkString(", ")}")
-    }
-    println("---")
-  }
-}

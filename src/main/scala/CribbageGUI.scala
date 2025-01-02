@@ -52,18 +52,3 @@ class CribbageGUI extends MainFrame {
   minimumSize = size
   centerOnScreen()
 }
-
-@main
-def main(): Unit = {
-  val gui = CribbageGUI()
-  gui.open()
-}
-
-@main
-def stats(): Unit = {
-  val hand1 = util.Random.shuffle(Card.fullDeck).take(5)
-  val hand2 = util.Random.shuffle(Card.fullDeck).take(5)
-  println(hand1)
-  println(hand2)
-  println(Card.fullDeck)
-}
