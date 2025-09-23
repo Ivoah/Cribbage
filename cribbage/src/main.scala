@@ -36,7 +36,7 @@ def webhook(): Unit = {
         }
 
         requests.post(
-          "http://192.168.1.160:8080/message",
+          "http://localhost:8080/message",
           auth = requests.RequestAuth.Basic("sms", "hPoDs2nU"),
           data = upickle.default.stream(ujson.Obj("message" -> score, "phoneNumbers" -> ujson.Arr(phoneNumber)))
         )
