@@ -1,14 +1,24 @@
-object Suit extends Enumeration {
-  val Diamonds, Hearts, Spades, Clubs = Value
+enum Suit(val unicodeBase: Int) {
+  case Diamonds extends Suit(0x1F0A0)
+  case Hearts extends Suit(0x1F0B0)
+  case Spades extends Suit(0x1F0C0)
+  case Clubs extends Suit(0x1F0D0)
 }
 
-case class Card(value: Int, suit: Suit.Value) {
+case class Card(value: Int, suit: Suit) {
   private val name = Card.names(value - 1)
   override def toString: String = s"$name of $suit"
+  def toUnicode: String = Character.toChars(suit.unicodeBase + value).mkString
+
+  def shortName: String = {
+    if (value > 1 && value < 10) s"${value.toString.head}${suit.toString.head}"
+    else s"${name.head}${suit.toString.head}"
+  }
 
   val scoreValue: Int = if (value >= 10) 10 else value
 
   def +(other: Card): Int = scoreValue + other.scoreValue
+
 }
 
 object Card {
@@ -24,9 +34,9 @@ object Card {
     "Nine", "Ten", "Jack", "Queen", "King"
   )
 
-  val fullDeck = for (s <- Suit.values.toSeq.sorted; v <- names) yield Card(v, s)
+  val fullDeck = for (s <- Suit.values; v <- names) yield Card(v, s)
 
-  def apply(value: String, suit: Suit.Value): Card = Card(names.indexOf(value) + 1, suit)
+  def apply(value: String, suit: Suit): Card = Card(names.indexOf(value) + 1, suit)
 
   def fromShortName(name: String): Card = {
     name match {

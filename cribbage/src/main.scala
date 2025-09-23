@@ -8,12 +8,51 @@ def gui(): Unit = {
 }
 
 @main
+def webhook(): Unit = {
+  import net.ivoah.vial.*
+
+  Server(
+    Router {
+      case ("POST", _, request) =>
+        val payload = ujson.read(request.body)
+        val rawHand = payload("payload")("message").str
+        val phoneNumber = payload("payload")("phoneNumber").str
+
+        val cards = Try(rawHand.split(" ").map(Card.fromShortName).toSeq)
+
+        val score = cards match {
+          case Success(cards) if cards.length == 5 =>
+            val hand = Hand(cards.take(4).toSet)
+            val cut = cards.last
+            val scores = hand.score(cut)
+            s"""${scores.flatMap {
+              case (t, sets) => sets.map{case (s, v) => s"$t for $v: ${s.mkString(", ")}"}
+            }.toSeq.mkString("\n")}
+            |Total: ${scores.flatMap(_._2.map(_._2)).sum}""".stripMargin
+          case Success(_) =>
+            "Hand must be 4 cards followed by cut card"
+          case Failure(_) =>
+            "Could not parse cards"
+        }
+
+        requests.post(
+          "http://192.168.1.160:8080/message",
+          auth = requests.RequestAuth.Basic("sms", "hPoDs2nU"),
+          data = upickle.default.stream(ujson.Obj("message" -> score, "phoneNumbers" -> ujson.Arr(phoneNumber)))
+        )
+        Response(score)
+    },
+    "127.0.0.1", 2000
+  ).serve()
+}
+
+@main
 def cmd(args: String*): Unit = {
   val cards = Try(args.mkString(" ").split(" ").map(Card.fromShortName).toSeq)
 
   cards match {
     case Success(cards) if cards.length == 5 =>
-      val hand = Hand(cards.take(4).toSet)
+      val hand = Hand(cards.init.toSet)
       val cut = cards.last
       val scores = hand.score(cut)
       println(scores.flatMap {
@@ -28,12 +67,15 @@ def cmd(args: String*): Unit = {
 }
 
 @main
-def stats(): Unit = {
-  val hand1 = util.Random.shuffle(Card.fullDeck).take(5)
-  val hand2 = util.Random.shuffle(Card.fullDeck).take(5)
-  println(hand1)
-  println(hand2)
-  println(Card.fullDeck)
+def random(): Unit = {
+  val cards = util.Random.shuffle(Card.fullDeck).take(5)
+  val hand = Hand(cards.init.toSet)
+  val scores = hand.score(cards.last)
+  println(cards.map(_.shortName).mkString(" "))
+  println(scores.flatMap {
+    case (t, sets) => sets.map{case (s, v) => s"$t for $v: ${s.mkString(", ")}"}
+  }.toSeq.mkString("\n"))
+  println(s"Total: ${scores.flatMap(_._2.map(_._2)).sum}")
 }
 
 @main

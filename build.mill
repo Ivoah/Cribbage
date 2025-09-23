@@ -1,0 +1,16 @@
+//| mill-version: 1.0.4
+
+package build
+import mill._, scalalib._
+
+object cribbage extends ScalaModule {
+  def scalaVersion = "3.3.6"
+  def mvnDeps = Seq(
+    mvn"org.scala-lang.modules::scala-swing:3.0.0",
+    mvn"com.github.weisj:darklaf-core:3.0.2",
+    mvn"net.ivoah::vial:0.6.1",
+    mvn"com.lihaoyi::requests:0.9.0",
+    mvn"com.lihaoyi::upickle:4.0.2"
+  )
+  def mainClass = Some("webhook")
+}
